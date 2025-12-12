@@ -316,7 +316,7 @@
         // === 2. 關卡設計 (Corrected Paths & Bilingual) ===
         const levels = [
             {
-                id: 1, title: "第 1 關：點對點網絡 (P2P)", concept: "Peer-to-Peer",
+                id: 1, title: "第 1 關", concept: "Peer-to-Peer",
                 desc: "兩部電腦需要直接交換檔案，無需中央伺服器。請選擇最常用的**雙絞線 (UTP)** 將它們連接起來。<br>(Connect two PCs directly using UTP cable.)",
                 devices: [{t:'pc',x:150,y:200,l:'工作站 A<br>Workstation A'}, {t:'pc',x:750,y:200,l:'工作站 B<br>Workstation B'}],
                 slots: [{x:450,y:200,req:'utp',type:'cable'}],
@@ -326,7 +326,7 @@
                 successMsg: "正確！<br>在 P2P 網絡中，所有節點地位平等。無屏蔽雙絞線 (UTP) 是最常見的連接線材。<br>(Correct! UTP is standard for LANs.)"
             },
             {
-                id: 2, title: "第 2 關：無線區域網絡 (WLAN)", concept: "Wireless Access",
+                id: 2, title: "第 2 關", concept: "Wireless Access",
                 desc: "學校的**智能手機**需要存取伺服器資料。手機沒有網絡線插孔，應如何連接至有線網絡？<br>(How to connect a Smartphone to the wired network?)",
                 // FIX: Green dot path: Server(0) -> Switch(1) -> Slot(AP) -> Phone(2)
                 devices: [{t:'server',x:100,y:250,l:'檔案伺服器<br>File Server'}, {t:'switch',x:350,y:250,l:'交換器<br>Switch'}, {t:'phone',x:800,y:350,l:'智能手機<br>Smartphone'}],
@@ -341,7 +341,7 @@
                 successMsg: "成功！<br>無線接達點 (AP) 充當有線網絡與無線裝置之間的橋樑。<br>(Success! AP bridges wired and wireless networks.)"
             },
             {
-                id: 3, title: "第 3 關：廣播與碰撞 (Broadcast)", concept: "Hub vs Switch",
+                id: 3, title: "第 3 關：", concept: "Hub vs Switch",
                 desc: "User A 發送資料給 User B。<br>⚠️ **警告**：請選擇正確設備，避免資料被黑客 (Hacker) 截取。<br>(Select the device that prevents data interception by Hacker.)",
                 devices: [{t:'pc',x:100,y:150,l:'User A'}, {t:'pc',x:800,y:150,l:'User B'}, {t:'pc',x:450,y:350,l:'黑客 (Hacker)'}],
                 slots: [{x:450,y:150,req:'switch'}],
@@ -358,7 +358,7 @@
                 isHackerLevel: true
             },
             {
-                id: 4, title: "第 4 關：網絡介面卡 (NIC)", concept: "Hardware",
+                id: 4, title: "第 4 關：", concept: "Hardware",
                 desc: "這部**舊式電腦**的主機板沒有內建網絡接口，需要安裝什麼擴充卡才能連接到交換器？<br>(What card connects a PC to the network?)",
                 devices: [{t:'pc',x:100,y:200,l:'舊式電腦<br>Old PC'}, {t:'switch',x:700,y:200,l:'交換器<br>Switch'}],
                 slots: [{x:400,y:200,req:'nic_wired'}],
@@ -371,7 +371,7 @@
                 successMsg: "正確。<br>網絡介面卡 (NIC) 提供 RJ-45 接口，負責處理數據傳送。<br>(Correct. NIC provides RJ-45 interface.)"
             },
             {
-                id: 5, title: "第 5 關：無線網絡介面卡 (Wireless NIC)", concept: "Wireless Hardware",
+                id: 5, title: "第 5 關：", concept: "Wireless Hardware",
                 desc: "這部**手提電腦**希望連接 Wi-Fi，它需要具備什麼硬件？<br>(What hardware connects a laptop to Wi-Fi?)",
                 devices: [{t:'laptop',x:100,y:200,l:'手提電腦<br>Laptop'}, {t:'ap',x:700,y:200,l:'無線接達點<br>AP'}],
                 slots: [{x:400,y:200,req:'nic_wireless'}],
@@ -384,7 +384,7 @@
                 successMsg: "正確。<br>無線網絡介面卡 (Wireless NIC) 負責將數位訊號轉換為無線電波。<br>(Correct. W-NIC handles radio signals.)"
             },
             {
-                id: 6, title: "第 6 關：網絡資源共享 (Sharing)", concept: "Resource Sharing",
+                id: 6, title: "第 6 關：", concept: "Resource Sharing",
                 desc: "辦公室希望所有員工共用一部打印機。請將**打印機**連接至網絡交換器。<br>(Connect the printer to the switch for sharing.)",
                 devices: [{t:'switch',x:200,y:200,l:'交換器<br>Switch'}], 
                 slots: [{x:600,y:200,req:'printer'}],
@@ -394,7 +394,7 @@
                 successMsg: "正確！<br>連接至交換器的網絡打印機可供區域網絡內所有使用者共享。<br>(Correct! Network Printer is shared.)"
             },
             {
-                id: 7, title: "第 7 關：雙絞線 (UTP)", concept: "Transmission Media",
+                id: 7, title: "第 7 關：", concept: "Transmission Media",
                 desc: "辦公室內短距離傳輸 (例如 100米內)，最經濟且常用的線材是什麼？<br>(Most common cable for short distances?)",
                 devices: [{t:'pc',x:200,y:200,l:'電腦<br>PC'}, {t:'switch',x:750,y:200,l:'交換器<br>Switch'}],
                 slots: [{x:450,y:200,req:'utp',type:'cable'}],
@@ -404,7 +404,7 @@
                 successMsg: "正確。<br>無屏蔽雙絞線 (UTP) 成本低廉，易於安裝。<br>(Correct. UTP is standard for Ethernet.)"
             },
             {
-                id: 8, title: "第 8 關：電磁干擾 (EMI)", concept: "Shielding",
+                id: 8, title: "第 8 關：", concept: "Shielding",
                 desc: "工廠環境充滿大型馬達，產生高電磁干擾 (EMI)。普通 UTP 訊號受損，應改用什麼？<br>(High EMI environment. Which cable to use?)",
                 devices: [{t:'pc',x:150,y:200,l:'工業電腦<br>Industrial PC'}, {t:'switch',x:750,y:200,l:'交換器<br>Switch'}],
                 slots: [{x:450,y:200,req:'stp',type:'cable'}],
@@ -416,7 +416,7 @@
                 failMsg: "❌ 傳輸失敗！<br>無屏蔽雙絞線 (UTP) 受到電磁干擾，導致數據損毀。<br>(Fail! UTP is affected by EMI.)"
             },
             {
-                id: 9, title: "第 9 關：光纖傳輸 (Optical Fiber)", concept: "Fiber Optics",
+                id: 9, title: "第 9 關：", concept: "Fiber Optics",
                 desc: "連接兩棟相距 3公里的校園大樓。銅線訊號衰減過大，應使用什麼媒介？<br>(Connect buildings 3km apart. Copper is too short.)",
                 devices: [{t:'switch',x:100,y:200,l:'A 座<br>Block A'}, {t:'switch',x:700,y:200,l:'B 座<br>Block B'}],
                 slots: [{x:400,y:200,req:'fiber',type:'cable'}],
@@ -426,7 +426,7 @@
                 successMsg: "正確！<br>光纖 (Optical Fiber) 利用全內反射原理傳輸，適合長距離骨幹網絡。<br>(Correct! Fiber uses light for long distances.)"
             },
             {
-                id: 10, title: "第 10 關：個人區域網絡 (PAN)", concept: "Bluetooth",
+                id: 10, title: "第 10 關：", concept: "Bluetooth",
                 desc: "使用無線耳機連接手機，屬於個人區域網絡 (PAN)。請選擇適當的無線技術。<br>(Connect wireless headset to phone.)",
                 devices: [{t:'phone',x:200,y:200,l:'手機<br>Phone'}],
                 slots: [{x:600,y:200,req:'headset'}],
@@ -436,7 +436,7 @@
                 successMsg: "正確。<br>藍牙 (Bluetooth) 是短距離無線通訊標準，專為低功耗設備設計。<br>(Correct. Bluetooth is for PAN.)"
             },
             {
-                id: 11, title: "第 11 關：基礎架構模式 (Infrastructure)", concept: "WLAN Mode",
+                id: 11, title: "第 11 關：", concept: "WLAN Mode",
                 desc: "圖書館希望建立無線區域網絡 (WLAN) 供讀者上網。核心設備是什麼？<br>(Core device for WLAN in library?)",
                 devices: [{t:'switch',x:200,y:300,l:'交換器<br>Switch'}, {t:'phone',x:600,y:100,l:'讀者<br>Reader'}],
                 slots: [{x:400,y:200,req:'ap'}],
@@ -446,7 +446,7 @@
                 successMsg: "正確。<br>在基礎架構模式中，所有無線裝置均通過無線接達點 (AP) 進行通訊。<br>(Correct. Infrastructure mode uses AP.)"
             },
             {
-                id: 12, title: "第 12 關：無線漫遊 (Roaming)", concept: "SSID",
+                id: 12, title: "第 12 關：", concept: "SSID",
                 desc: "校園範圍廣大，需要增加第二個 AP。為確保裝置自動切換，請選擇正確設備。<br>(Add 2nd AP for seamless roaming.)",
                 devices: [{t:'switch',x:400,y:350,l:'交換器<br>Switch'}, {t:'ap',x:200,y:200,l:'AP (A區)'}, {t:'phone',x:400,y:100,l:'用戶<br>User'}],
                 slots: [{x:600,y:200,req:'ap'}],
@@ -456,7 +456,7 @@
                 successMsg: "正確。<br>多個 AP 設定相同的服務集識別碼 (SSID)，可實現無線漫遊。<br>(Correct. Same SSID allows roaming.)"
             },
             {
-                id: 13, title: "第 13 關：微波衛星通訊 (Satellite)", concept: "Satellite",
+                id: 13, title: "第 13 關：", concept: "Satellite",
                 desc: "科學考察隊位於偏遠山區，無法連接光纖或基地台。他們如何連接互聯網？<br>(Internet for remote areas?)",
                 devices: [{t:'pc',x:200,y:300,l:'電腦<br>PC'}],
                 slots: [{x:500,y:100,req:'sat_dish'}],
@@ -466,7 +466,7 @@
                 successMsg: "正確。<br>衛星通訊覆蓋範圍極廣，不受地形限制。<br>(Correct. Satellite covers remote areas.)"
             },
             {
-                id: 14, title: "第 14 關：路由器 (Router)", concept: "Routing",
+                id: 14, title: "第 14 關：", concept: "Routing",
                 desc: "區域網絡 (LAN) 需要連接至互聯網 (WAN)。哪種設備負責尋找路徑並轉發封包？<br>(Device connecting LAN to WAN?)",
                 devices: [{t:'switch',x:200,y:200,l:'LAN'}, {t:'cloud',x:750,y:200,l:'互聯網<br>Internet'}],
                 slots: [{x:475,y:200,req:'router'}],
@@ -476,7 +476,7 @@
                 successMsg: "正確。<br>路由器 (Router) 根據 IP 地址決定數據封包的最佳傳輸路徑。<br>(Correct. Router determines best path.)"
             },
             {
-                id: 15, title: "第 15 關：數據機 (Modem)", concept: "Modulation",
+                id: 15, title: "第 15 關：", concept: "Modulation",
                 desc: "使用傳統電話線路 (模擬訊號) 上網。需要什麼設備將電腦的數碼訊號進行轉換？<br>(Convert Digital to Analog?)",
                 devices: [{t:'router',x:200,y:200,l:'路由器<br>Router'}, {t:'cloud',x:700,y:200,l:'ISP'}],
                 slots: [{x:450,y:200,req:'modem'}],
@@ -486,7 +486,7 @@
                 successMsg: "正確。<br>數據機 (Modem) 負責調變 (Digital to Analog) 與解調。<br>(Correct. Modem handles Modulation/Demodulation.)"
             },
             {
-                id: 16, title: "第 16 關：專用線路 (Leased Line)", concept: "Security",
+                id: 16, title: "第 16 關：", concept: "Security",
                 desc: "銀行總部與分行之間需要**高度安全**且**頻寬保證**的連接。<br>(Secure and guaranteed connection for Bank.)",
                 devices: [{t:'bank',x:150,y:200,l:'總行<br>HQ'}, {t:'bank',x:750,y:200,l:'分行<br>Branch'}],
                 slots: [{x:450,y:200,req:'leased_line',type:'cable'}],
@@ -496,7 +496,7 @@
                 successMsg: "正確。<br>專線 (Leased Line) 提供點對點的專用連接，安全性極高。<br>(Correct. Leased Line is secure and dedicated.)"
             },
             {
-                id: 17, title: "第 17 關：頻寬需求 (Bandwidth)", concept: "High Speed",
+                id: 17, title: "第 17 關: ", concept: "High Speed",
                 desc: "公司進行 4K 視像會議時出現嚴重延遲。現有銅線頻寬不足，應升級為？<br>(Upgrade for 4K video conferencing?)",
                 devices: [{t:'pc',x:150,y:200,l:'會議室<br>Conf Room'}, {t:'cloud',x:750,y:200,l:'互聯網<br>Internet'}],
                 slots: [{x:450,y:200,req:'fiber',type:'cable'}], 
@@ -506,7 +506,7 @@
                 successMsg: "正確。<br>光纖提供極高的頻寬 (Bandwidth)，適合傳輸大量多媒體數據。<br>(Correct. Fiber offers high bandwidth.)"
             },
             {
-                id: 18, title: "第 18 關：家用寬頻路由器", concept: "SOHO Router",
+                id: 18, title: "第 18 關：", concept: "SOHO Router",
                 desc: "現代家庭通常使用「多合一」設備來連接 ISP。請選擇該設備。<br>(All-in-one device for home?)",
                 devices: [{t:'pc',x:150,y:100,l:'電腦<br>PC'}, {t:'phone',x:150,y:300,l:'手機<br>Phone'}, {t:'modem',x:650,y:200,l:'數據機<br>Modem'}],
                 slots: [{x:400,y:200,req:'router'}],
@@ -516,7 +516,7 @@
                 successMsg: "正確。<br>家用無線路由器實際上整合了 Switch, AP 及 Router 功能。<br>(Correct. Home Router is all-in-one.)"
             },
             {
-                id: 19, title: "第 19 關：物聯網 (IoT)", concept: "Low Power",
+                id: 19, title: "第 19 關：", concept: "Low Power",
                 desc: "智能燈泡需要與手機連接，要求低功耗且配對簡單。<br>(Low power connection for IoT bulb?)",
                 devices: [{t:'phone',x:200,y:200,l:'手機<br>Phone'}],
                 slots: [{x:600,y:200,req:'bt_dongle'}], 
@@ -526,7 +526,7 @@
                 successMsg: "正確。<br>IoT 裝置常利用藍牙 (Bluetooth) 或 Zigbee 等低功耗技術。<br>(Correct. Bluetooth/Zigbee for IoT.)"
             },
             {
-                id: 20, title: "第 20 關：終極測試 (校園網絡)", concept: "Topology",
+                id: 20, title: "第 20 關：終極測試 ", concept: "Topology",
                 desc: "請組建完整的學校網絡：<br>1. 手機連無線<br>2. 伺服器連交換器<br>3. 交換器連路由器<br>4. 路由器連數據機<br>(Build a complete school network.)",
                 devices: [
                     {t:'phone',x:50,y:100,l:'用戶<br>User'}, {t:'server',x:50,y:300,l:'伺服器<br>Server'},
