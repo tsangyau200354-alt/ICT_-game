@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網絡架構師 Network Architect (Bilingual)</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f7;
+            --board-bg: #ffffff;
+            --accent-color: #2c3e50;
+            --highlight: #e74c3c;
+            --text-color: #34495e;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --slot-border: #95a5a6;
+        }
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 { margin: 10px 0; color: var(--accent-color); font-size: 1.8em; letter-spacing: 1px; text-align: center; }
+        .subtitle { color: #7f8c8d; margin-bottom: 15px; font-size: 1em; }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 950px;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 題目卡 */
+        .question-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .level-title { font-weight: 800; font-size: 1.2em; color: var(--accent-color); }
+        .concept-tag { 
+            background: #e8f6f3; color: #16a085; 
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold;
+            border: 1px solid #16a085;
+        }
+        .level-desc { font-size: 1em; line-height: 1.5; color: #555; }
+
+        /* 遊戲畫布 */
+        .game-board {
+            background-color: var(--board-bg);
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            width: 100%;
+            height: 450px;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 2px solid #bdc3c7;
+            z-index: 5;
+        }
+
+        .connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        
+        /* 線路樣式 */
+        .cable-copper { stroke: #e67e22; stroke-width: 4; } 
+        .cable-stp { stroke: #8e44ad; stroke-width: 5; stroke-dasharray: 6,3; } 
+        .cable-fiber { stroke: #3498db; stroke-width: 4; } 
+        .cable-wireless { stroke: #bdc3c7; stroke-width: 3; stroke-dasharray: 6,6; } 
+        .cable-bluetooth { stroke: #3498db; stroke-width: 2; stroke-dasharray: 3,3; } 
+        .cable-satellite { stroke: #f1c40f; stroke-width: 3; stroke-dasharray: 10,5; } 
+        .cable-slot { stroke: #bdc3c7; stroke-width: 3; stroke-dasharray: 4; } 
+        
+        /* 設備樣式 */
+        .device {
+            width: 100px;
+            height: 90px;
+            background-color: #fff;
+            border: 2px solid #34495e;
+            color: #333;
+            border-radius: 12px;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            padding: 2px;
+            transition: all 0.3s;
+        }
+        .device-icon { font-size: 2em; margin-bottom: 0px; }
+        .device-label { font-size: 0.75em; font-weight: bold; line-height: 1.1; color: #2c3e50; margin-top: 2px; }
+
+        /* 插槽樣式 */
+        .slot {
+            width: 100px;
+            height: 100px;
+            border: 3px dashed var(--slot-border);
+            border-radius: 12px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #95a5a6;
+            font-size: 0.8em;
+            background: rgba(255,255,255,0.9);
+            z-index: 5;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            padding: 5px;
+        }
+        .slot:hover { border-color: var(--highlight); color: var(--highlight); background: #fff; }
+        .slot.filled { border-style: solid; border-color: var(--success); background: white; color: #333; }
+        .slot-cable { width: 140px; height: 50px; border-radius: 25px; }
+
+        /* 封包 */
+        .packet {
+            width: 18px;
+            height: 18px;
+            background-color: var(--success);
+            border-radius: 50%;
+            position: absolute;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 0 10px var(--success);
+            border: 3px solid white;
+        }
+        .packet-hacker {
+            background-color: var(--danger) !important;
+            box-shadow: 0 0 10px var(--danger) !important;
+        }
+
+        /* 底部控制欄 */
+        .controls {
+            background-color: white;
+            padding: 10px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            box-sizing: border-box;
+            border-top: 1px solid #ddd;
+        }
+        
+        body { padding-bottom: 240px; } /* 為底部留空 */
+
+        .inventory {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .inv-item {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #bdc3c7;
+            font-size: 0.75em;
+            min-width: 80px;
+            max-width: 100px;
+            display: flex; flex-direction: column; align-items: center;
+            transition: all 0.2s;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .inv-item:hover { transform: translateY(-3px); border-color: var(--accent-color); }
+        .inv-item.selected { border-color: var(--highlight); background-color: #fadbd8; transform: translateY(-3px); }
+
+        .btn-action {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s;
+        }
+        .btn-action:hover { background-color: #219150; transform: scale(1.05); }
+        .btn-action:disabled { background-color: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* 彈窗 */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 200;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white; color: #333; padding: 30px; border-radius: 20px;
+            text-align: center; max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-top: 10px solid var(--accent-color);
+            animation: popIn 0.3s;
+        }
+        @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        .hidden { display: none !important; }
+
+        .noise-zone {
+            position: absolute; border: 3px dashed var(--warning); background: rgba(243, 156, 18, 0.1);
+            color: var(--warning); font-weight: bold; display: flex; justify-content: center; align-items: center;
+            z-index: 0; border-radius: 10px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌐 網絡架構師</h1>
+    <p class="subtitle">ICT 網絡基礎模擬器 (Network Architect)</p>
+
+    <div class="game-container">
+        <div class="question-card">
+            <div class="level-header">
+                <span class="level-title" id="lvl-title">載入中...</span>
+                <span class="concept-tag" id="lvl-concept">概念</span>
+            </div>
+            <div class="level-desc" id="lvl-desc">...</div>
+        </div>
+
+        <div class="game-board" id="board">
+            <svg class="connections" id="svg-lines"></svg>
+            <div id="env-layer"></div>
+            <div id="device-layer"></div>
+            <div id="packet-container"></div> 
+        </div>
+    </div>
+
+    <div class="controls">
+        <p style="margin: 0 0 10px 0; color: #7f8c8d; font-size: 0.9em;">👇 請點擊下方物品，然後放入上方虛線框中 (Select item & place in slot)</p>
+        <div class="inventory" id="inventory"></div>
+        <button class="btn-action" id="btn-test" onclick="testNetwork()">🚀 啟動網絡 (Start Network)</button>
+    </div>
+
+    <div id="result-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title" style="font-size: 2em; margin-bottom: 10px;"></h2>
+            <div id="modal-icon" style="font-size: 4em; margin: 10px 0;"></div>
+            <p id="modal-msg" style="margin: 20px 0; font-size: 1.1em; line-height: 1.6; color: #555;"></p>
+            <button class="btn-action" id="modal-btn" onclick="nextLevel()">下一關 (Next Level)</button>
+        </div>
+    </div>
+
+    <script>
+        // === 1. 圖標與標籤庫 (Bilingual) ===
+        const icons = {
+            'pc': '💻', 'switch': '🔌', 'router': '📡', 'cloud': '☁️',
+            'hub': '🕸️', 'ap': '📶', 'phone': '📱', 'server': '🖥️',
+            'modem': '📟', 'printer': '🖨️', 'laptop': '💻',
+            'sat_dish': '📡', 'headset': '🎧', 'bank': '🏦',
+            'nic_wired': '💳', 'nic_wireless': '📶', 'display_card': '🎞️',
+            'scanner': '📠', 'bt_dongle': '🦷', 
+            'utp': '🟠', 'stp': '🟣', 'fiber': '🔵', 'leased_line': '🔒'
+        };
+
+        const labels = {
+            'pc': '個人電腦<br>PC', 
+            'switch': '交換器<br>Switch', 
+            'router': '路由器<br>Router', 
+            'cloud': '互聯網<br>Internet',
+            'hub': '集線器<br>Hub', 
+            'ap': '無線接達點<br>AP', 
+            'phone': '智能手機<br>Smartphone', 
+            'server': '伺服器<br>Server',
+            'modem': '數據機<br>Modem', 
+            'printer': '網絡打印機<br>Printer', 
+            'laptop': '手提電腦<br>Laptop',
+            'sat_dish': '衛星天線<br>Satellite Dish', 
+            'headset': '藍牙耳機<br>BT Headset', 
+            'bank': '銀行總部<br>Bank HQ',
+            'nic_wired': '網絡介面卡<br>NIC', 
+            'nic_wireless': '無線網卡<br>Wireless NIC', 
+            'display_card': '顯示卡<br>Display Card',
+            'scanner': '掃描器<br>Scanner', 
+            'bt_dongle': '藍牙適配器<br>BT Dongle',
+            'utp': '無屏蔽雙絞線<br>UTP', 
+            'stp': '屏蔽雙絞線<br>STP', 
+            'fiber': '光纖<br>Optical Fiber', 
+            'leased_line': '專線<br>Leased Line'
+        };
+
+        // === 2. 關卡設計 (Corrected Paths & Bilingual) ===
+        const levels = [
+            {
+                id: 1, title: "第 1 關：點對點網絡 (P2P)", concept: "Peer-to-Peer",
+                desc: "兩部電腦需要直接交換檔案，無需中央伺服器。請選擇最常用的**雙絞線 (UTP)** 將它們連接起來。<br>(Connect two PCs directly using UTP cable.)",
+                devices: [{t:'pc',x:150,y:200,l:'工作站 A<br>Workstation A'}, {t:'pc',x:750,y:200,l:'工作站 B<br>Workstation B'}],
+                slots: [{x:450,y:200,req:'utp',type:'cable'}],
+                lines: [{f:{x:195,y:200},t:{x:705,y:200},type:'slot'}],
+                inv: ['utp', 'switch', 'fiber'],
+                targetIdx: 1, // Green dot goes to device at index 1
+                successMsg: "正確！<br>在 P2P 網絡中，所有節點地位平等。無屏蔽雙絞線 (UTP) 是最常見的連接線材。<br>(Correct! UTP is standard for LANs.)"
+            },
+            {
+                id: 2, title: "第 2 關：無線區域網絡 (WLAN)", concept: "Wireless Access",
+                desc: "學校的**智能手機**需要存取伺服器資料。手機沒有網絡線插孔，應如何連接至有線網絡？<br>(How to connect a Smartphone to the wired network?)",
+                // FIX: Green dot path: Server(0) -> Switch(1) -> Slot(AP) -> Phone(2)
+                devices: [{t:'server',x:100,y:250,l:'檔案伺服器<br>File Server'}, {t:'switch',x:350,y:250,l:'交換器<br>Switch'}, {t:'phone',x:800,y:350,l:'智能手機<br>Smartphone'}],
+                slots: [{x:600,y:250,req:'ap'}], 
+                lines: [
+                    {f:{x:145,y:250},t:{x:305,y:250},type:'cable-copper'}, // Server->Switch
+                    {f:{x:395,y:250},t:{x:550,y:250},type:'cable-copper'}, // Switch->Slot
+                    {f:{x:650,y:260},t:{x:755,y:330},type:'cable-wireless'} // Slot->Phone
+                ],
+                inv: ['router', 'ap', 'pc'],
+                targetIdx: 2, // IMPORTANT: Green dot goes to Phone (Index 2)
+                successMsg: "成功！<br>無線接達點 (AP) 充當有線網絡與無線裝置之間的橋樑。<br>(Success! AP bridges wired and wireless networks.)"
+            },
+            {
+                id: 3, title: "第 3 關：廣播與碰撞 (Broadcast)", concept: "Hub vs Switch",
+                desc: "User A 發送資料給 User B。<br>⚠️ **警告**：請選擇正確設備，避免資料被黑客 (Hacker) 截取。<br>(Select the device that prevents data interception by Hacker.)",
+                devices: [{t:'pc',x:100,y:150,l:'User A'}, {t:'pc',x:800,y:150,l:'User B'}, {t:'pc',x:450,y:350,l:'黑客 (Hacker)'}],
+                slots: [{x:450,y:150,req:'switch'}],
+                lines: [
+                    {f:{x:145,y:150},t:{x:400,y:150},type:'cable-copper'}, 
+                    {f:{x:500,y:150},t:{x:755,y:150},type:'cable-copper'}, 
+                    {f:{x:450,y:200},t:{x:450,y:305},type:'cable-copper'}
+                ],
+                inv: ['hub', 'switch'],
+                targetIdx: 1, // Green dot goes to User B
+                hackerIdx: 2, // Red dot goes to Hacker
+                successMsg: "做得好！<br>交換器 (Switch) 能辨識目標地址，僅將資料轉發至目標。<br>(Great! Switch only forwards data to the target.)",
+                failMsg: "❌ 資料外洩！<br>集線器 (Hub) 會將訊號「廣播」至所有連接埠，導致黑客收到資料。<br>(Data Leak! Hub broadcasts data to everyone.)",
+                isHackerLevel: true
+            },
+            {
+                id: 4, title: "第 4 關：網絡介面卡 (NIC)", concept: "Hardware",
+                desc: "這部**舊式電腦**的主機板沒有內建網絡接口，需要安裝什麼擴充卡才能連接到交換器？<br>(What card connects a PC to the network?)",
+                devices: [{t:'pc',x:100,y:200,l:'舊式電腦<br>Old PC'}, {t:'switch',x:700,y:200,l:'交換器<br>Switch'}],
+                slots: [{x:400,y:200,req:'nic_wired'}],
+                lines: [
+                    {f:{x:145,y:200},t:{x:350,y:200},type:'cable-copper'}, 
+                    {f:{x:450,y:200},t:{x:655,y:200},type:'cable-copper'}
+                ],
+                inv: ['nic_wired', 'nic_wireless', 'display_card'],
+                targetIdx: 1,
+                successMsg: "正確。<br>網絡介面卡 (NIC) 提供 RJ-45 接口，負責處理數據傳送。<br>(Correct. NIC provides RJ-45 interface.)"
+            },
+            {
+                id: 5, title: "第 5 關：無線網絡介面卡 (Wireless NIC)", concept: "Wireless Hardware",
+                desc: "這部**手提電腦**希望連接 Wi-Fi，它需要具備什麼硬件？<br>(What hardware connects a laptop to Wi-Fi?)",
+                devices: [{t:'laptop',x:100,y:200,l:'手提電腦<br>Laptop'}, {t:'ap',x:700,y:200,l:'無線接達點<br>AP'}],
+                slots: [{x:400,y:200,req:'nic_wireless'}],
+                lines: [
+                    {f:{x:145,y:200},t:{x:350,y:200},type:'cable-copper'}, // Bus
+                    {f:{x:450,y:200},t:{x:655,y:200},type:'cable-wireless'}
+                ],
+                inv: ['nic_wired', 'nic_wireless'],
+                targetIdx: 1,
+                successMsg: "正確。<br>無線網絡介面卡 (Wireless NIC) 負責將數位訊號轉換為無線電波。<br>(Correct. W-NIC handles radio signals.)"
+            },
+            {
+                id: 6, title: "第 6 關：網絡資源共享 (Sharing)", concept: "Resource Sharing",
+                desc: "辦公室希望所有員工共用一部打印機。請將**打印機**連接至網絡交換器。<br>(Connect the printer to the switch for sharing.)",
+                devices: [{t:'switch',x:200,y:200,l:'交換器<br>Switch'}], 
+                slots: [{x:600,y:200,req:'printer'}],
+                lines: [{f:{x:245,y:200},t:{x:550,y:200},type:'cable-copper'}],
+                inv: ['printer', 'scanner'],
+                targetIsSlot: true, // Target is the slot itself
+                successMsg: "正確！<br>連接至交換器的網絡打印機可供區域網絡內所有使用者共享。<br>(Correct! Network Printer is shared.)"
+            },
+            {
+                id: 7, title: "第 7 關：雙絞線 (UTP)", concept: "Transmission Media",
+                desc: "辦公室內短距離傳輸 (例如 100米內)，最經濟且常用的線材是什麼？<br>(Most common cable for short distances?)",
+                devices: [{t:'pc',x:200,y:200,l:'電腦<br>PC'}, {t:'switch',x:750,y:200,l:'交換器<br>Switch'}],
+                slots: [{x:450,y:200,req:'utp',type:'cable'}],
+                lines: [{f:{x:245,y:200},t:{x:705,y:200},type:'slot'}],
+                inv: ['utp', 'fiber', 'stp'],
+                targetIdx: 1,
+                successMsg: "正確。<br>無屏蔽雙絞線 (UTP) 成本低廉，易於安裝。<br>(Correct. UTP is standard for Ethernet.)"
+            },
+            {
+                id: 8, title: "第 8 關：電磁干擾 (EMI)", concept: "Shielding",
+                desc: "工廠環境充滿大型馬達，產生高電磁干擾 (EMI)。普通 UTP 訊號受損，應改用什麼？<br>(High EMI environment. Which cable to use?)",
+                devices: [{t:'pc',x:150,y:200,l:'工業電腦<br>Industrial PC'}, {t:'switch',x:750,y:200,l:'交換器<br>Switch'}],
+                slots: [{x:450,y:200,req:'stp',type:'cable'}],
+                lines: [{f:{x:195,y:200},t:{x:705,y:200},type:'slot'}],
+                env: {type: 'noise', rect: [300, 100, 300, 200]}, 
+                inv: ['utp', 'stp', 'fiber'],
+                targetIdx: 1,
+                successMsg: "正確！<br>屏蔽雙絞線 (STP) 具有金屬網層，能有效抵禦電磁干擾。<br>(Correct! STP blocks EMI.)",
+                failMsg: "❌ 傳輸失敗！<br>無屏蔽雙絞線 (UTP) 受到電磁干擾，導致數據損毀。<br>(Fail! UTP is affected by EMI.)"
+            },
+            {
+                id: 9, title: "第 9 關：光纖傳輸 (Optical Fiber)", concept: "Fiber Optics",
+                desc: "連接兩棟相距 3公里的校園大樓。銅線訊號衰減過大，應使用什麼媒介？<br>(Connect buildings 3km apart. Copper is too short.)",
+                devices: [{t:'switch',x:100,y:200,l:'A 座<br>Block A'}, {t:'switch',x:700,y:200,l:'B 座<br>Block B'}],
+                slots: [{x:400,y:200,req:'fiber',type:'cable'}],
+                lines: [{f:{x:145,y:200},t:{x:655,y:200},type:'slot'}],
+                inv: ['utp', 'fiber'],
+                targetIdx: 1,
+                successMsg: "正確！<br>光纖 (Optical Fiber) 利用全內反射原理傳輸，適合長距離骨幹網絡。<br>(Correct! Fiber uses light for long distances.)"
+            },
+            {
+                id: 10, title: "第 10 關：個人區域網絡 (PAN)", concept: "Bluetooth",
+                desc: "使用無線耳機連接手機，屬於個人區域網絡 (PAN)。請選擇適當的無線技術。<br>(Connect wireless headset to phone.)",
+                devices: [{t:'phone',x:200,y:200,l:'手機<br>Phone'}],
+                slots: [{x:600,y:200,req:'headset'}],
+                lines: [{f:{x:245,y:200},t:{x:555,y:200},type:'cable-bluetooth'}],
+                inv: ['headset', 'ap'],
+                targetIsSlot: true,
+                successMsg: "正確。<br>藍牙 (Bluetooth) 是短距離無線通訊標準，專為低功耗設備設計。<br>(Correct. Bluetooth is for PAN.)"
+            },
+            {
+                id: 11, title: "第 11 關：基礎架構模式 (Infrastructure)", concept: "WLAN Mode",
+                desc: "圖書館希望建立無線區域網絡 (WLAN) 供讀者上網。核心設備是什麼？<br>(Core device for WLAN in library?)",
+                devices: [{t:'switch',x:200,y:300,l:'交換器<br>Switch'}, {t:'phone',x:600,y:100,l:'讀者<br>Reader'}],
+                slots: [{x:400,y:200,req:'ap'}],
+                lines: [{f:{x:245,y:280},t:{x:355,y:220},type:'cable-copper'}, {f:{x:445,y:190},t:{x:555,y:120},type:'cable-wireless'}],
+                inv: ['ap', 'router'],
+                targetIdx: 1,
+                successMsg: "正確。<br>在基礎架構模式中，所有無線裝置均通過無線接達點 (AP) 進行通訊。<br>(Correct. Infrastructure mode uses AP.)"
+            },
+            {
+                id: 12, title: "第 12 關：無線漫遊 (Roaming)", concept: "SSID",
+                desc: "校園範圍廣大，需要增加第二個 AP。為確保裝置自動切換，請選擇正確設備。<br>(Add 2nd AP for seamless roaming.)",
+                devices: [{t:'switch',x:400,y:350,l:'交換器<br>Switch'}, {t:'ap',x:200,y:200,l:'AP (A區)'}, {t:'phone',x:400,y:100,l:'用戶<br>User'}],
+                slots: [{x:600,y:200,req:'ap'}],
+                lines: [{f:{x:355,y:330},t:{x:245,y:245},type:'cable-copper'}, {f:{x:445,y:330},t:{x:555,y:245},type:'cable-copper'}],
+                inv: ['ap', 'router'],
+                targetIsSlot: true,
+                successMsg: "正確。<br>多個 AP 設定相同的服務集識別碼 (SSID)，可實現無線漫遊。<br>(Correct. Same SSID allows roaming.)"
+            },
+            {
+                id: 13, title: "第 13 關：微波衛星通訊 (Satellite)", concept: "Satellite",
+                desc: "科學考察隊位於偏遠山區，無法連接光纖或基地台。他們如何連接互聯網？<br>(Internet for remote areas?)",
+                devices: [{t:'pc',x:200,y:300,l:'電腦<br>PC'}],
+                slots: [{x:500,y:100,req:'sat_dish'}],
+                lines: [{f:{x:245,y:290},t:{x:455,y:130},type:'cable-satellite'}],
+                inv: ['sat_dish', 'ap', 'fiber'],
+                targetIsSlot: true,
+                successMsg: "正確。<br>衛星通訊覆蓋範圍極廣，不受地形限制。<br>(Correct. Satellite covers remote areas.)"
+            },
+            {
+                id: 14, title: "第 14 關：路由器 (Router)", concept: "Routing",
+                desc: "區域網絡 (LAN) 需要連接至互聯網 (WAN)。哪種設備負責尋找路徑並轉發封包？<br>(Device connecting LAN to WAN?)",
+                devices: [{t:'switch',x:200,y:200,l:'LAN'}, {t:'cloud',x:750,y:200,l:'互聯網<br>Internet'}],
+                slots: [{x:475,y:200,req:'router'}],
+                lines: [{f:{x:245,y:200},t:{x:430,y:200},type:'cable-copper'}, {f:{x:520,y:200},t:{x:705,y:200},type:'cable-copper'}],
+                inv: ['router', 'switch'],
+                targetIdx: 1,
+                successMsg: "正確。<br>路由器 (Router) 根據 IP 地址決定數據封包的最佳傳輸路徑。<br>(Correct. Router determines best path.)"
+            },
+            {
+                id: 15, title: "第 15 關：數據機 (Modem)", concept: "Modulation",
+                desc: "使用傳統電話線路 (模擬訊號) 上網。需要什麼設備將電腦的數碼訊號進行轉換？<br>(Convert Digital to Analog?)",
+                devices: [{t:'router',x:200,y:200,l:'路由器<br>Router'}, {t:'cloud',x:700,y:200,l:'ISP'}],
+                slots: [{x:450,y:200,req:'modem'}],
+                lines: [{f:{x:245,y:200},t:{x:405,y:200},type:'cable-copper'}, {f:{x:495,y:200},t:{x:655,y:200},type:'cable-copper'}],
+                inv: ['modem', 'switch'],
+                targetIdx: 1,
+                successMsg: "正確。<br>數據機 (Modem) 負責調變 (Digital to Analog) 與解調。<br>(Correct. Modem handles Modulation/Demodulation.)"
+            },
+            {
+                id: 16, title: "第 16 關：專用線路 (Leased Line)", concept: "Security",
+                desc: "銀行總部與分行之間需要**高度安全**且**頻寬保證**的連接。<br>(Secure and guaranteed connection for Bank.)",
+                devices: [{t:'bank',x:150,y:200,l:'總行<br>HQ'}, {t:'bank',x:750,y:200,l:'分行<br>Branch'}],
+                slots: [{x:450,y:200,req:'leased_line',type:'cable'}],
+                lines: [{f:{x:195,y:200},t:{x:705,y:200},type:'slot'}],
+                inv: ['leased_line', 'cloud'],
+                targetIdx: 1,
+                successMsg: "正確。<br>專線 (Leased Line) 提供點對點的專用連接，安全性極高。<br>(Correct. Leased Line is secure and dedicated.)"
+            },
+            {
+                id: 17, title: "第 17 關：頻寬需求 (Bandwidth)", concept: "High Speed",
+                desc: "公司進行 4K 視像會議時出現嚴重延遲。現有銅線頻寬不足，應升級為？<br>(Upgrade for 4K video conferencing?)",
+                devices: [{t:'pc',x:150,y:200,l:'會議室<br>Conf Room'}, {t:'cloud',x:750,y:200,l:'互聯網<br>Internet'}],
+                slots: [{x:450,y:200,req:'fiber',type:'cable'}], 
+                lines: [{f:{x:195,y:200},t:{x:705,y:200},type:'slot'}],
+                inv: ['fiber', 'utp'], 
+                targetIdx: 1,
+                successMsg: "正確。<br>光纖提供極高的頻寬 (Bandwidth)，適合傳輸大量多媒體數據。<br>(Correct. Fiber offers high bandwidth.)"
+            },
+            {
+                id: 18, title: "第 18 關：家用寬頻路由器", concept: "SOHO Router",
+                desc: "現代家庭通常使用「多合一」設備來連接 ISP。請選擇該設備。<br>(All-in-one device for home?)",
+                devices: [{t:'pc',x:150,y:100,l:'電腦<br>PC'}, {t:'phone',x:150,y:300,l:'手機<br>Phone'}, {t:'modem',x:650,y:200,l:'數據機<br>Modem'}],
+                slots: [{x:400,y:200,req:'router'}],
+                lines: [{f:{x:195,y:120},t:{x:355,y:180},type:'cable-copper'}, {f:{x:195,y:280},t:{x:355,y:220},type:'cable-wireless'}, {f:{x:445,y:200},t:{x:605,y:200},type:'cable-copper'}],
+                inv: ['router', 'switch', 'ap'],
+                targetIdx: 2,
+                successMsg: "正確。<br>家用無線路由器實際上整合了 Switch, AP 及 Router 功能。<br>(Correct. Home Router is all-in-one.)"
+            },
+            {
+                id: 19, title: "第 19 關：物聯網 (IoT)", concept: "Low Power",
+                desc: "智能燈泡需要與手機連接，要求低功耗且配對簡單。<br>(Low power connection for IoT bulb?)",
+                devices: [{t:'phone',x:200,y:200,l:'手機<br>Phone'}],
+                slots: [{x:600,y:200,req:'bt_dongle'}], 
+                lines: [{f:{x:245,y:200},t:{x:555,y:200},type:'cable-bluetooth'}],
+                inv: ['bt_dongle', 'fiber'],
+                targetIsSlot: true,
+                successMsg: "正確。<br>IoT 裝置常利用藍牙 (Bluetooth) 或 Zigbee 等低功耗技術。<br>(Correct. Bluetooth/Zigbee for IoT.)"
+            },
+            {
+                id: 20, title: "第 20 關：終極測試 (校園網絡)", concept: "Topology",
+                desc: "請組建完整的學校網絡：<br>1. 手機連無線<br>2. 伺服器連交換器<br>3. 交換器連路由器<br>4. 路由器連數據機<br>(Build a complete school network.)",
+                devices: [
+                    {t:'phone',x:50,y:100,l:'用戶<br>User'}, {t:'server',x:50,y:300,l:'伺服器<br>Server'},
+                    {t:'cloud',x:850,y:200,l:'互聯網<br>Internet'}
+                ],
+                slots: [
+                    {x:200,y:150,req:'ap'}, {x:200,y:300,req:'switch'},
+                    {x:450,y:200,req:'router'}, {x:650,y:200,req:'modem'}
+                ],
+                lines: [
+                    {f:{x:95,y:120},t:{x:155,y:140},type:'cable-wireless'}, // Phone->AP
+                    {f:{x:95,y:300},t:{x:155,y:300},type:'cable-copper'}, // Server->Switch
+                    {f:{x:200,y:195},t:{x:200,y:255},type:'cable-copper'}, // AP->Switch
+                    {f:{x:245,y:300},t:{x:405,y:220},type:'cable-copper'}, // Switch->Router
+                    {f:{x:495,y:200},t:{x:605,y:200},type:'cable-copper'}, // Router->Modem
+                    {f:{x:695,y:200},t:{x:805,y:200},type:'cable-copper'}  // Modem->Cloud
+                ],
+                inv: ['ap', 'switch', 'router', 'modem', 'hub'],
+                targetIdx: 2, // Internet
+                successMsg: "恭喜！<br>你已經掌握了網絡架構的核心概念，通過了終極測試！<br>(Congratulations! You mastered it!)"
+            }
+        ];
+
+        // === 3. 遊戲引擎 ===
+        let currentLevelIdx = 0;
+        let selectedItem = null;
+        let placedItems = {}; 
+
+        function initLevel() {
+            const level = levels[currentLevelIdx];
+            document.getElementById('lvl-title').innerText = level.title;
+            document.getElementById('lvl-concept').innerText = level.concept;
+            document.getElementById('lvl-desc').innerHTML = level.desc;
+            document.getElementById('result-modal').classList.add('hidden');
+            
+            const btn = document.getElementById('btn-test');
+            btn.disabled = false;
+            
+            selectedItem = null;
+            placedItems = {};
+            
+            const board = document.getElementById('device-layer');
+            const envLayer = document.getElementById('env-layer');
+            const svg = document.getElementById('svg-lines');
+            const inv = document.getElementById('inventory');
+            const pktContainer = document.getElementById('packet-container');
+            
+            board.innerHTML = '';
+            envLayer.innerHTML = '';
+            svg.innerHTML = '';
+            inv.innerHTML = '';
+            pktContainer.innerHTML = '';
+
+            if (level.env) {
+                const z = document.createElement('div');
+                z.className = 'noise-zone';
+                const [x, y, w, h] = level.env.rect;
+                z.style.left = x+'px'; z.style.top = y+'px';
+                z.style.width = w+'px'; z.style.height = h+'px';
+                z.innerText = "⚡ 高干擾區域 (High EMI) ⚡";
+                envLayer.appendChild(z);
+            }
+
+            level.lines.forEach((line, idx) => {
+                const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                l.setAttribute('x1', line.f.x); l.setAttribute('y1', line.f.y);
+                l.setAttribute('x2', line.t.x); l.setAttribute('y2', line.t.y);
+                
+                if (line.type === 'slot') {
+                    l.setAttribute('class', 'cable-slot'); 
+                    l.id = `line-slot-${idx}`; 
+                } else {
+                    l.setAttribute('class', `cable-${line.type.split('-')[1] || 'copper'}`);
+                }
+                svg.appendChild(l);
+            });
+
+            level.devices.forEach(dev => {
+                const div = document.createElement('div');
+                div.className = 'device';
+                div.style.left = (dev.x - 50) + 'px';
+                div.style.top = (dev.y - 45) + 'px';
+                div.innerHTML = `
+                    <span class="device-icon">${icons[dev.t]}</span>
+                    <span class="device-label">${dev.l}</span>
+                `;
+                board.appendChild(div);
+            });
+
+            level.slots.forEach((slot, index) => {
+                const div = document.createElement('div');
+                div.className = slot.type === 'cable' ? 'slot slot-cable' : 'slot';
+                div.style.left = slot.x + 'px';
+                div.style.top = slot.y + 'px';
+                div.dataset.index = index;
+                div.innerHTML = slot.type === 'cable' ? '選擇線材<br>(Select Cable)' : '放置設備<br>(Place Device)';
+                div.onclick = () => placeItem(index, slot.type === 'cable');
+                board.appendChild(div);
+            });
+
+            level.inv.forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'inv-item';
+                // 移除 split，保留完整雙語標籤
+                div.innerHTML = `<div style="font-size:1.8em">${icons[key]}</div><div>${labels[key]}</div>`;
+                div.onclick = (e) => selectInventory(key, div);
+                inv.appendChild(div);
+            });
+        }
+
+        function selectInventory(key, el) {
+            document.querySelectorAll('.inv-item').forEach(d => d.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedItem = key;
+        }
+
+        function placeItem(slotIdx, isCable) {
+            if (!selectedItem) {
+                alert("請先在下方物品欄選擇一個項目！\n(Please select an item first!)");
+                return;
+            }
+            placedItems[slotIdx] = selectedItem;
+            
+            const slotDiv = document.querySelectorAll('.slot')[slotIdx];
+            slotDiv.classList.add('filled');
+            
+            if (isCable) {
+                // 放置時可以只顯示中文或簡短名稱，以免格子太擠
+                let shortLabel = labels[selectedItem].split('<br>')[0]; 
+                slotDiv.innerHTML = `${icons[selectedItem]} ${shortLabel}`;
+                const lines = document.querySelectorAll('.cable-slot');
+                lines.forEach(l => {
+                    l.setAttribute('class', `cable-${selectedItem}`);
+                });
+            } else {
+                let shortLabel = labels[selectedItem].split('<br>')[0];
+                slotDiv.innerHTML = `
+                    <div class="device-icon">${icons[selectedItem]}</div>
+                    <div style="font-size:0.8em; color:#333;">${shortLabel}</div>
+                `;
+            }
+        }
+
+        function testNetwork() {
+            const level = levels[currentLevelIdx];
+            const btn = document.getElementById('btn-test');
+            
+            if (Object.keys(placedItems).length < level.slots.length) {
+                alert("請填滿所有虛線框格！\n(Please fill all slots!)");
+                return;
+            }
+
+            let isCorrect = true;
+            let isHubFail = false; 
+
+            level.slots.forEach((slot, idx) => {
+                if (placedItems[idx] !== slot.req) {
+                    isCorrect = false;
+                    if (placedItems[idx] === 'hub' && level.isHackerLevel) isHubFail = true;
+                }
+            });
+
+            if (level.id === 8 && placedItems[0] === 'utp') {
+                isCorrect = false; 
+            }
+
+            btn.disabled = true;
+            
+            if (isCorrect) {
+                runPacketAnimation('correct', () => showResult(true, level.successMsg));
+            } else {
+                if (isHubFail) {
+                    runPacketAnimation('hub_fail', () => showResult(false, level.failMsg));
+                } else {
+                    runPacketAnimation('fail', () => showResult(false, level.failMsg || "配置錯誤。訊號無法送達。<br>(Config Error. Signal lost.)"));
+                }
+            }
+        }
+
+        function runPacketAnimation(type, callback) {
+            const level = levels[currentLevelIdx];
+            const container = document.getElementById('packet-container');
+            container.innerHTML = '';
+            
+            // --- 路徑計算邏輯修正 ---
+            const startDev = level.devices[0]; 
+            let destDev;
+
+            // 1. 如果有 targetIsSlot，目標是 Slot 本身 (Level 6 Printer / Level 10 BT)
+            if (level.targetIsSlot) {
+                destDev = {x: level.slots[0].x, y: level.slots[0].y};
+            } 
+            // 2. 如果指定了 targetIdx (解決 Level 2/3 問題)
+            else if (level.targetIdx !== undefined) {
+                destDev = level.devices[level.targetIdx];
+            } 
+            // 3. 預設：列表中的最後一個
+            else {
+                destDev = level.devices[level.devices.length - 1];
+            }
+
+            let pathSegments = [];
+            pathSegments.push({x: startDev.x, y: startDev.y});
+            
+            // 加入中間 Slot 點 (按順序)
+            level.slots.forEach(s => pathSegments.push({x: s.x, y: s.y})); 
+            
+            // 加入終點
+            if (!level.targetIsSlot) {
+                pathSegments.push({x: destDev.x, y: destDev.y});
+            }
+
+            // 創建主封包
+            const pkt = document.createElement('div');
+            pkt.className = 'packet';
+            container.appendChild(pkt);
+
+            if (type === 'hub_fail') {
+                // Hub 廣播: 走到 Hub (Slot 0) 後分裂
+                // 路徑: Start -> Slot -> (Split) -> Dest / Hacker
+                let hubPos = {x: level.slots[0].x, y: level.slots[0].y};
+                
+                animateSingleMove(pkt, {x:startDev.x, y:startDev.y}, hubPos, 'var(--success)', () => {
+                    // 到達 Hub，產生紅色封包飛向 Hacker
+                    const hackerDev = level.devices[level.hackerIdx]; 
+                    const pktHacker = document.createElement('div');
+                    pktHacker.className = 'packet packet-hacker'; 
+                    pktHacker.style.left = hubPos.x + 'px';
+                    pktHacker.style.top = hubPos.y + 'px';
+                    pktHacker.style.display = 'block';
+                    container.appendChild(pktHacker);
+
+                    // 紅 -> Hacker
+                    animateSingleMove(pktHacker, hubPos, {x: hackerDev.x, y: hackerDev.y}, 'var(--danger)', () => {
+                        callback(); 
+                    });
+                    
+                    // 綠 -> Dest (雖然失敗，但 Hub 其實也會傳給正確目標，只是不安全)
+                    animateSingleMove(pkt, hubPos, {x: destDev.x, y: destDev.y}, 'var(--success)', () => {});
+                });
+
+            } else if (type === 'correct') {
+                // 修正：使用多段動畫函數，確保不會跳過中間點
+                animateSequence(pkt, pathSegments, 0, callback);
+            } else {
+                // 失敗：變紅並停止
+                pkt.classList.add('packet-hacker');
+                setTimeout(callback, 800);
+            }
+        }
+
+        function animateSingleMove(el, from, to, color, onDone) {
+            el.style.backgroundColor = color;
+            el.style.display = 'block';
+            el.animate([
+                { left: from.x + 'px', top: from.y + 'px' },
+                { left: to.x + 'px', top: to.y + 'px' }
+            ], {
+                duration: 800, fill: 'forwards', easing: 'linear'
+            }).onfinish = () => {
+                el.style.left = to.x + 'px';
+                el.style.top = to.y + 'px';
+                onDone();
+            };
+        }
+
+        function animateSequence(el, points, idx, onDone) {
+            if (idx >= points.length - 1) {
+                onDone();
+                return;
+            }
+            const p1 = points[idx];
+            const p2 = points[idx+1];
+            
+            el.style.display = 'block';
+            el.style.left = p1.x + 'px';
+            el.style.top = p1.y + 'px';
+
+            el.animate([
+                { left: p1.x + 'px', top: p1.y + 'px' },
+                { left: p2.x + 'px', top: p2.y + 'px' }
+            ], {
+                duration: 600, fill: 'forwards', easing: 'linear'
+            }).onfinish = () => {
+                animateSequence(el, points, idx + 1, onDone);
+            };
+        }
+
+        function showResult(success, msg) {
+            const modal = document.getElementById('result-modal');
+            const title = document.getElementById('modal-title');
+            const icon = document.getElementById('modal-icon');
+            const mMsg = document.getElementById('modal-msg');
+            const btn = document.getElementById('modal-btn');
+            
+            modal.classList.remove('hidden');
+            mMsg.innerHTML = msg;
+            
+            if (success) {
+                title.innerText = "🎉 任務完成 (Completed!)";
+                title.style.color = "var(--success)";
+                icon.innerHTML = "✅";
+                btn.innerText = "下一關 (Next Level)";
+                btn.onclick = nextLevel;
+            } else {
+                title.innerText = "⚠️ 連線失敗 (Failed)";
+                title.style.color = "var(--danger)";
+                icon.innerHTML = "❌";
+                btn.innerText = "再試一次 (Retry)";
+                btn.onclick = () => {
+                    modal.classList.add('hidden');
+                    document.getElementById('btn-test').disabled = false;
+                    document.getElementById('packet-container').innerHTML = '';
+                };
+            }
+        }
+
+        function nextLevel() {
+            currentLevelIdx++;
+            if (currentLevelIdx >= levels.length) {
+                currentLevelIdx = 0; 
+                alert("恭喜通關所有 20 關！\n(Congratulations! All levels completed!)");
+            }
+            initLevel();
+        }
+
+        // 啟動
+        initLevel();
+
+    </script>
+</body>
+</html>
